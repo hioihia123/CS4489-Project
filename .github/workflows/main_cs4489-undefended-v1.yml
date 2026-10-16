@@ -1,59 +1,33 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js app to Azure Web App - cs4489-undefended-v1
+name: Deploy vulnerable FastAPI backend to Azure
 
 on:
   push:
     branches:
-      - 'main'
+      - main
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read #This is required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          node-version: '24.x'
+          python-version: '3.13'
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-app
-          path: .
+      - name: Install dependencies
+        working-directory: backend-vulnerable
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_4E225ABC2D2F469A98B089AF3D178279 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D6471E18367844A6B4A2A2F8C4E9FD4B }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B88E8C76734B4AFD9BA7EBDE84E3E15E }}
-
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
+      - name: Deploy vulnerable backend to Azure
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'cs4489-undefended-v1'
-          slot-name: 'Production'
-          package: .
-          
+          app-name: cs4489-undefended-v1
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: backend-vulnerable
