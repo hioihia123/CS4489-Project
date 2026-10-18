@@ -1,29 +1,83 @@
-const account = {
-    username: "guest",
-    password: "password"
-};
+"use strict";
 
-localStorage.setItem("account", JSON.stringify(account));
+// Supply your backend's origin after adding a POST /auth/login endpoint.
+// Example: const API_BASE_URL = "https://your-backend.azurewebsites.net";
+const API_BASE_URL = "";
 
-const form = document.querySelector("form");
+const root = document.documentElement;
+const themeToggle = document.getElementById("themeToggle");
+const passwordToggle = document.getElementById("passwordToggle");
+const passwordInput = document.getElementById("password");
+const loginForm = document.getElementById("loginForm");
+const submitButton = document.getElementById("submitButton");
+const formStatus = document.getElementById("formStatus");
 
-form.addEventListener("submit", function (event) {
-    event.preventDefault();
+// Only the visual theme is saved. Passwords and account credentials are not.
+const savedTheme = localStorage.getItem("cs4389-theme");
+if (savedTheme === "light" || savedTheme === "dark") {
+  root.dataset.theme = savedTheme;
+} else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+  root.dataset.theme = "dark";
+}
 
-    const username = document.querySelector("#username").value;
-    const password = document.querySelector("#password").value;
+function updateThemeLabel() {
+  const dark = root.dataset.theme === "dark";
+  themeToggle.setAttribute("aria-label", `Switch to ${dark ? "light" : "dark"} mode`);
+  document.querySelector('meta[name="theme-color"]').content = dark ? "#0d1321" : "#f5f7fb";
+}
+updateThemeLabel();
 
-    const storedAccount = JSON.parse(
-        localStorage.getItem("account")
-    );
+themeToggle.addEventListener("click", () => {
+  const next = root.dataset.theme === "dark" ? "light" : "dark";
+  root.dataset.theme = next;
+  localStorage.setItem("cs4389-theme", next);
+  updateThemeLabel();
+});
 
-    if (
-        username === storedAccount.username &&
-        password === storedAccount.password
-    ) {
-        alert("Login successful!");
+passwordToggle.addEventListener("click", () => {
+  const visible = passwordInput.type === "password";
+  passwordInput.type = visible ? "text" : "password";
+  passwordToggle.setAttribute("aria-pressed", String(visible));
+  passwordToggle.setAttribute("aria-label", visible ? "Hide password" : "Show password");
+});
 
-    } else {
-        alert("Incorrect email or password.");
+function showStatus(message) {
+  formStatus.textContent = message;
+  formStatus.hidden = false;
+}
+
+loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  formStatus.hidden = true;
+
+  if (!API_BASE_URL) {
+    showStatus("Login API is not connected yet. The page is ready for backend integration.");
+    return;
+  }
+
+  const username = document.getElementById("username").value.trim();
+  const password = passwordInput.value;
+  if (!username || !password) return;
+
+  submitButton.disabled = true;
+  try {
+    const response = await fetch(`${API_BASE_URL.replace(/\/$/, "")}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+      credentials: "omit"
+    });
+
+    if (!response.ok) {
+      showStatus(response.status === 401 ? "Incorrect username or password." : "Unable to sign in. Please try again.");
+      return;
     }
+
+    // Replace with a secure, backend-approved session/redirect flow.
+    showStatus("Signed in successfully.");
+  } catch {
+    showStatus("Could not reach the login server. Please try again.");
+  } finally {
+    submitButton.disabled = false;
+  }
 });
