@@ -1,8 +1,8 @@
 "use strict";
 
-// Supply your backend's origin after adding a POST /auth/login endpoint.
-// Example: const API_BASE_URL = "https://your-backend.azurewebsites.net";
-const API_BASE_URL = "";
+const API_BASE_URL =
+  "https://cs4489-undefended-v1-cjbndzc9h0hvgqf7.westus-01.azurewebsites.net";
+
 
 const root = document.documentElement;
 const themeToggle = document.getElementById("themeToggle");
