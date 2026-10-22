@@ -102,7 +102,7 @@ def customers_for_tenant(tenant_id: int):
     }
 
 
-# Represents the JSON sent by your login page.
+# Represents the JSON sent by login page.
 class LoginRequest(BaseModel):
     username: str = Field(min_length=1, max_length=50)
     password: str = Field(min_length=1)
