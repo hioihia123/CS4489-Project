@@ -1,4 +1,4 @@
-# CS4389 Data and Application Security Final Project
+# CS4389 Data and Application Security Project
 
 ## Project Overview
 
