@@ -3,7 +3,6 @@ from db import get_connection
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 from pydantic import BaseModel, Field
-from pwdlib import PasswordHash
 
 app = FastAPI(
     title="CS4489 Vulnerable Backend",
@@ -102,49 +101,79 @@ def customers_for_tenant(tenant_id: int):
     }
 
 
-# Represents the JSON sent by your login page.
+# Represents the JSON sent by login page.
 class LoginRequest(BaseModel):
     username: str = Field(min_length=1, max_length=50)
     password: str = Field(min_length=1)
 
 
-password_hash = PasswordHash.recommended()
-
-
 @app.post("/auth/login")
 def login(data: LoginRequest):
-    # 1. Look up the username in PostgreSQL.
-    with get_connection() as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT id, tenant_id, username, password, role
-                FROM users
-                WHERE username = %s
-                """,
-                (data.username,)
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # INTENTIONALLY VULNERABLE:
+        # User input is directly inserted into SQL.
+        query = f"""
+            SELECT
+                id,
+                tenant_id,
+                username,
+                password,
+                role
+            FROM users
+            WHERE username = '{data.username}'
+            AND password = '{data.password}'
+            LIMIT 1;
+        """
+
+        print("\n=== VULNERABLE LOGIN QUERY ===")
+        print(query)
+        print("==============================\n")
+
+        cursor.execute(query)
+
+        user = cursor.fetchone()
+
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid username or password"
             )
 
-            user = cursor.fetchone()
+        return {
+            "message": "Login successful",
+            "user_id": user[0],
+            "tenant_id": user[1],
+            "username": user[2],
+            "password": user[3],
+            "role": user[4]
+        }
 
-    # 2. Verify the password against its stored hash.
-    if not user or not user[3].startswith("$argon2id$"):
+    except HTTPException:
+        raise
+
+    except Exception as e:
+
+        # INTENTIONALLY VULNERABLE:
+        # Database error is returned directly to client.
         raise HTTPException(
-            status_code=401,
-            detail="Invalid username or password"
+            status_code=500,
+            detail={
+                "message": "Database error",
+                "database_error": str(e)
+            }
         )
 
-    if not password_hash.verify(data.password, user[3]):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid username or password"
-        )
+    finally:
 
-    # 3. Return a successful verification response.
-    return {
-        "message": "Login successful",
-        "username": user[2],
-        "tenant_id": user[1],
-        "role": user[4]
-    }
+        if cursor:
+            cursor.close()
 
+        if conn:
+            conn.close()
