@@ -139,19 +139,11 @@ def login(data: LoginRequest):
         cursor.execute(query)
 
         user = cursor.fetchone()
-	password = cursor.fetchone()
-
         if not user:
             raise HTTPException(
                 status_code=401,
                 detail="Username does not exist"
             )
-
-	if not password:
-	    raise HTTPException(
-		status_code=401,
-		detail="Password does not exist"
-	    )
 
         return {
             "message": "Login successful",
