@@ -68,11 +68,37 @@ loginForm.addEventListener("submit", async (event) => {
       credentials: "omit"
     });
 
-    if (!response.ok) {
-      showStatus(response.status === 401 ? "Incorrect username or password." : "Unable to sign in. Please try again.");
-      return;
-    }
+if (!response.ok) {
 
+  // INTENTIONALLY VULNERABLE:
+  // Display backend database errors directly to the user.
+
+  const errorBody = await response.json().catch(() => null);
+
+  const detail = errorBody?.detail;
+
+  let errorMessage;
+
+  if (detail && typeof detail === "object" && detail.database_error) {
+
+    errorMessage =
+      `${detail.message || "Database error"}\n\n` +
+      `${detail.database_error}`;
+
+  } else if (typeof detail === "string") {
+
+    errorMessage = detail;
+
+  } else {
+
+    errorMessage = "An unknown backend error occurred.";
+
+  }
+
+  showStatus(`HTTP ${response.status}\n\n${errorMessage}`);
+
+  return;
+}
     // Replace with a secure, backend-approved session/redirect flow.
     showStatus("Signed in successfully.");
   } catch {
