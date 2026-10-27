@@ -106,7 +106,6 @@ class LoginRequest(BaseModel):
     username: str = Field(min_length=1, max_length=50)
     password: str = Field(min_length=1)
 
-
 @app.post("/auth/login")
 def login(data: LoginRequest):
 
@@ -117,8 +116,34 @@ def login(data: LoginRequest):
         conn = get_connection()
         cursor = conn.cursor()
 
-        # INTENTIONALLY VULNERABLE:
-        # User input is directly inserted into SQL.
+        # -------------------------------------------------
+        # VULNERABILITY 1:
+        # Username enumeration + SQL injection
+        # -------------------------------------------------
+
+        username_query = f"""
+            SELECT id
+            FROM users
+            WHERE username = '{data.username}'
+            LIMIT 1;
+        """
+
+        cursor.execute(username_query)
+
+        username_exists = cursor.fetchone()
+
+        if not username_exists:
+            raise HTTPException(
+                status_code=404,
+                detail="Username does not exist"
+            )
+
+
+        # -------------------------------------------------
+        # VULNERABILITY 2:
+        # Unsafe SQL construction
+        # -------------------------------------------------
+
         query = f"""
             SELECT
                 id,
@@ -139,11 +164,24 @@ def login(data: LoginRequest):
         cursor.execute(query)
 
         user = cursor.fetchone()
+
+
+        # -------------------------------------------------
+        # VULNERABILITY 3:
+        # Reveals that username exists but password is wrong
+        # -------------------------------------------------
+
         if not user:
             raise HTTPException(
                 status_code=401,
-                detail="Username does not exist"
+                detail="Username exists, but password is incorrect"
             )
+
+
+        # -------------------------------------------------
+        # VULNERABILITY 4:
+        # Excessive sensitive information returned
+        # -------------------------------------------------
 
         return {
             "message": "Login successful",
@@ -154,13 +192,18 @@ def login(data: LoginRequest):
             "role": user[4]
         }
 
+
     except HTTPException:
         raise
 
+
     except Exception as e:
 
-        # INTENTIONALLY VULNERABLE:
-        # Database error is returned directly to client.
+        # -------------------------------------------------
+        # VULNERABILITY 5:
+        # Detailed database errors exposed
+        # -------------------------------------------------
+
         raise HTTPException(
             status_code=500,
             detail={
@@ -168,6 +211,7 @@ def login(data: LoginRequest):
                 "database_error": str(e)
             }
         )
+
 
     finally:
 
