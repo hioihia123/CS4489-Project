@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>CS4389 Vulnerable Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .dashboard {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        h1 {
+            color: #1e293b;
+        }
+
+        button, select {
+            padding: 10px;
+            margin: 10px 5px;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .warning {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="dashboard">
+
+        <h1>CS4389: Database Dashboard</h1>
+
+        <p id="userInfo"></p>
+
+        <div class="warning">
+            Intentionally Vulnerable Database Security Lab
+        </div>
+
+        <h2>Customer Records</h2>
+
+        <label for="tenantSelect">
+            Select Company:
+        </label>
+
+        <select id="tenantSelect">
+            <option value="1">Alpha Health</option>
+            <option value="2">Beta Health</option>
+        </select>
+
+        <button id="loadCustomers">
+            Load Customers
+        </button>
+
+        <h3>Database Response</h3>
+
+        <pre id="customerResults">
+            No records loaded.
+        </pre>
+
+        <button id="logoutButton">
+            Logout
+        </button>
+
+    </main>
+
+    <script src="dashboard.js"></script>
+
+</body>
+</html>

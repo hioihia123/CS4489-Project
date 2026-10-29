@@ -99,8 +99,24 @@ if (!response.ok) {
 
   return;
 }
-    // Replace with a secure, backend-approved session/redirect flow.
-    showStatus("Signed in successfully.");
+	// Read successful login response
+	const loginData = await response.json();
+
+	// Store only the information needed for this classroom demo
+	const demoUser = {
+	user_id: loginData.user_id,
+  	username: loginData.username,
+ 	tenant_id: loginData.tenant_id,
+  	role: loginData.role
+	};
+
+	sessionStorage.setItem(
+        "cs4489_demo_user",
+        JSON.stringify(demoUser)
+        );
+
+// Redirect to dashboard
+window.location.href = "dashboard.html";
   } catch {
     showStatus("Could not reach the login server. Please try again.");
   } finally {
