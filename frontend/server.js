@@ -7,9 +7,12 @@ const routes = {
   "/": "index.html",
   "/index.html": "index.html",
   "/login.css": "login.css",
-  "/login.js": "login.js"
-};
+  "/login.js": "login.js",
 
+  // Dashboard pages
+  "/dashboard.html": "dashboard.html",
+  "/dashboard.js": "dashboard.js"
+};
 const mime = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript" };
 
 http.createServer((request, response) => {
