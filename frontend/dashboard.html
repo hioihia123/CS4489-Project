@@ -1,94 +1,135 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>Customer Portal</title>
+  <style>
+    :root {
+      --ink: #19243a;
+      --muted: #68758b;
+      --line: #e5eaf2;
+      --blue: #505fdf;
+      --background: #f5f7fb;
+    }
 
-    <title>CS4389 Vulnerable Dashboard</title>
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--background); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input, select { font: inherit; }
+    button, select { cursor: pointer; }
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f1f5f9;
-            margin: 0;
-            padding: 40px;
-        }
+    .topbar { background: white; border-bottom: 1px solid var(--line); }
+    .topbar-inner { max-width: 1130px; margin: auto; min-height: 74px; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 17px; font-weight: 750; letter-spacing: -.02em; }
+    .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; color: white; background: var(--blue); border-radius: 11px; font-weight: 800; }
+    .top-actions { display: flex; align-items: center; gap: 18px; }
+    .account { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+    .account strong { font-size: 13px; font-weight: 650; }
+    .account span { font-size: 12px; color: var(--muted); }
+    .signout { border: 1px solid var(--line); background: white; color: #42516b; border-radius: 9px; padding: 9px 13px; font-size: 13px; font-weight: 650; }
+    .signout:hover { background: #f6f8fd; }
 
-        .dashboard {
-            max-width: 1000px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-        }
+    .page { max-width: 1130px; padding: 42px 24px 70px; margin: auto; }
+    .eyebrow { color: var(--blue); font-size: 11px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 10px; }
+    h1 { margin: 0; font-size: clamp(27px, 4vw, 35px); letter-spacing: -.035em; line-height: 1.2; }
+    .subtitle { color: var(--muted); font-size: 14px; margin: 12px 0 29px; }
+    .overview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .summary { padding: 21px 23px; background: white; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 5px 18px rgba(35, 50, 80, .025); }
+    .summary-label { color: var(--muted); font-size: 12px; font-weight: 650; }
+    .summary-value { display: block; font-size: 24px; font-weight: 750; letter-spacing: -.03em; margin-top: 9px; }
+    .summary-value.company { font-size: 21px; }
 
-        h1 {
-            color: #1e293b;
-        }
+    .panel { background: white; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 8px 32px rgba(35, 50, 80, .03); overflow: hidden; }
+    .panel-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 24px 25px 17px; }
+    h2 { font-size: 18px; letter-spacing: -.02em; margin: 0; }
+    .panel-subtitle { color: var(--muted); font-size: 13px; margin: 7px 0 0; }
+    .filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; padding: 0 25px 22px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field label { color: #56647b; font-size: 12px; font-weight: 650; }
+    .field select, .field input { height: 42px; border: 1px solid #d9e1ec; border-radius: 9px; background: white; color: var(--ink); outline: none; padding: 0 13px; }
+    .field select:focus, .field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(80, 95, 223, .11); }
+    .field select { min-width: 185px; }
+    .search-field { flex: 1; min-width: 220px; }
+    .search-field input { width: 100%; }
+    .refresh { height: 42px; padding: 0 19px; border: none; border-radius: 9px; background: var(--blue); color: white; font-size: 13px; font-weight: 700; }
+    .refresh:hover { background: #4151cf; }
+    .refresh:disabled { opacity: .6; cursor: wait; }
+    .message { margin: 0 25px 18px; padding: 12px 14px; color: #963b3b; background: #fff0f0; border: 1px solid #f6d2d2; border-radius: 9px; font-size: 13px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; min-width: 700px; }
+    thead { background: #f8faff; }
+    th { color: #69768b; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; font-weight: 750; padding: 15px 25px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    td { padding: 17px 25px; border-bottom: 1px solid #edf1f6; color: #43516a; font-size: 13px; }
+    tbody tr:last-child td { border-bottom: none; }
+    .customer-name { display: flex; align-items: center; gap: 11px; color: var(--ink); font-weight: 650; }
+    .avatar { width: 33px; height: 33px; flex: 0 0 auto; display: grid; place-items: center; background: #eef0ff; border-radius: 50%; color: #4a59c9; font-size: 12px; font-weight: 750; }
+    .empty { text-align: center; padding: 35px 20px; color: var(--muted); }
+    .panel-foot { padding: 16px 25px; background: #fcfdff; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 
-        button, select {
-            padding: 10px;
-            margin: 10px 5px;
-        }
-
-        pre {
-            background: #0f172a;
-            color: #e2e8f0;
-            padding: 20px;
-            border-radius: 8px;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-        }
-
-        .warning {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 8px;
-        }
-    </style>
+    @media (max-width: 620px) {
+      .topbar-inner { padding: 12px 16px; }
+      .top-actions { gap: 10px; }
+      .account { display: none; }
+      .page { padding: 30px 16px 45px; }
+      .overview { grid-template-columns: 1fr; gap: 12px; }
+      .panel-head { padding: 22px 17px 17px; }
+      .filters { padding: 0 17px 20px; }
+      .field, .search-field, .refresh { width: 100%; }
+      .field select { width: 100%; }
+      .message { margin: 0 17px 17px; }
+    }
+  </style>
 </head>
-
 <body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="brand-mark">C</span><span>Customer Portal</span></div>
+      <div class="top-actions">
+        <div class="account"><strong id="userName">Account</strong><span id="userRole">Staff</span></div>
+        <button class="signout" id="logoutButton" type="button">Sign out</button>
+      </div>
+    </div>
+  </header>
 
-    <main class="dashboard">
+  <main class="page">
+    <p class="eyebrow">Customer management</p>
+    <h1>Customer directory</h1>
+    <p class="subtitle">View and search customer information in one place.</p>
 
-        <h1>CS4389: Database Dashboard</h1>
+    <section class="overview" aria-label="Overview">
+      <div class="summary"><span class="summary-label">Total customers</span><strong class="summary-value" id="customerCount">—</strong></div>
+      <div class="summary"><span class="summary-label">Selected company</span><strong class="summary-value company" id="selectedCompany">—</strong></div>
+    </section>
 
-        <p id="userInfo"></p>
-
-        <div class="warning">
-            Intentionally Vulnerable Database Security Lab
+    <section class="panel" aria-labelledby="recordsTitle">
+      <div class="panel-head">
+        <div><h2 id="recordsTitle">Customer records</h2><p class="panel-subtitle">Contact details and customer information</p></div>
+      </div>
+      <div class="filters">
+        <div class="field">
+          <label for="tenantSelect">Company</label>
+          <select id="tenantSelect"><option value="1">Alpha Health</option><option value="2">Beta Health</option></select>
         </div>
+        <div class="field search-field">
+          <label for="customerSearch">Search customers</label>
+          <input id="customerSearch" type="search" placeholder="Search name, email or phone">
+        </div>
+        <button class="refresh" id="loadCustomers" type="button">Refresh</button>
+      </div>
 
-        <h2>Customer Records</h2>
+      <div class="message" id="errorMessage" role="alert" hidden></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Customer</th><th>Email address</th><th>Phone</th><th>SSN last 4</th></tr></thead>
+          <tbody id="customerRows"><tr><td class="empty" colspan="4">Loading customer records...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="panel-foot" id="recordCount">Loading records...</div>
+    </section>
+  </main>
 
-        <label for="tenantSelect">
-            Select Company:
-        </label>
-
-        <select id="tenantSelect">
-            <option value="1">Alpha Health</option>
-            <option value="2">Beta Health</option>
-        </select>
-
-        <button id="loadCustomers">
-            Load Customers
-        </button>
-
-        <h3>Database Response</h3>
-
-        <pre id="customerResults">
-            No records loaded.
-        </pre>
-
-        <button id="logoutButton">
-            Logout
-        </button>
-
-    </main>
-
-    <script src="dashboard.js"></script>
-
+  <script src="dashboard.js"></script>
 </body>
 </html>
