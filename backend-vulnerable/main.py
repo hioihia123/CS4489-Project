@@ -1,8 +1,12 @@
+import os
 from fastapi import FastAPI
 from db import get_connection
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 from pydantic import BaseModel, Field
+
+class PhoneUpdate(BaseModel):
+    phone: str = Field(min_length=7, max_length=30)
 
 app = FastAPI(
     title="CS4489 Vulnerable Backend",
@@ -16,7 +20,7 @@ app.add_middleware(
         "http://localhost:8080"
     ],
     allow_credentials=False,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST","PATCH"],
     allow_headers=["Content-Type"]
 )
 
@@ -266,5 +270,72 @@ def admin_tenant_report():
         if cursor is not None:
             cursor.close()
 
+        if conn is not None:
+            conn.close()
+
+@app.patch("/api/customers/{customer_id}/phone")
+def update_customer_phone(
+    customer_id: int,
+    data: PhoneUpdate
+):
+    # Keep this intentionally vulnerable operation
+    # disabled unless running an isolated demo.
+    if os.getenv("ENABLE_UNDEFENDED_WRITE_DEMO") != "1":
+        raise HTTPException(
+            status_code=403,
+            detail="Customer editing demo is disabled"
+        )
+
+    conn = None
+
+    try:
+        conn = get_connection()
+
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE customers
+                SET phone = %s
+                WHERE id = %s
+                RETURNING id, tenant_id, full_name, phone;
+                """,
+                (data.phone, customer_id)
+            )
+
+            updated_customer = cursor.fetchone()
+
+        if updated_customer is None:
+            conn.rollback()
+
+            raise HTTPException(
+                status_code=404,
+                detail="Customer not found"
+            )
+
+        conn.commit()
+
+        return {
+            "message": "Customer updated successfully",
+            "customer": {
+                "id": updated_customer[0],
+                "tenant_id": updated_customer[1],
+                "full_name": updated_customer[2],
+                "phone": updated_customer[3]
+            }
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception:
+        if conn is not None:
+            conn.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail="Database update failed"
+        )
+
+    finally:
         if conn is not None:
             conn.close()
