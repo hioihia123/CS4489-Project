@@ -32,9 +32,7 @@
     .signout:hover { background: #f6f8fd; }
 
     .page { max-width: 1130px; padding: 42px 24px 70px; margin: auto; }
-    .eyebrow { color: var(--blue); font-size: 11px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 10px; }
-    h1 { margin: 0; font-size: clamp(27px, 4vw, 35px); letter-spacing: -.035em; line-height: 1.2; }
-    .subtitle { color: var(--muted); font-size: 14px; margin: 12px 0 29px; }
+    h1 { margin: 0 0 29px; font-size: clamp(27px, 4vw, 35px); letter-spacing: -.035em; line-height: 1.2; }
     .overview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
     .summary { padding: 21px 23px; background: white; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 5px 18px rgba(35, 50, 80, .025); }
     .summary-label { color: var(--muted); font-size: 12px; font-weight: 650; }
@@ -42,7 +40,8 @@
     .summary-value.company { font-size: 21px; }
 
     .panel { background: white; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 8px 32px rgba(35, 50, 80, .03); overflow: hidden; }
-    .panel-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 24px 25px 17px; }
+    .report-panel { margin-bottom: 24px; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px 25px 17px; }
     h2 { font-size: 18px; letter-spacing: -.02em; margin: 0; }
     .panel-subtitle { color: var(--muted); font-size: 13px; margin: 7px 0 0; }
     .filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; padding: 0 25px 22px; }
@@ -57,8 +56,9 @@
     .refresh:hover { background: #4151cf; }
     .refresh:disabled { opacity: .6; cursor: wait; }
     .message { margin: 0 25px 18px; padding: 12px 14px; color: #963b3b; background: #fff0f0; border: 1px solid #f6d2d2; border-radius: 9px; font-size: 13px; }
+    .message.success { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; text-align: left; min-width: 700px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; min-width: 800px; }
     thead { background: #f8faff; }
     th { color: #69768b; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; font-weight: 750; padding: 15px 25px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     td { padding: 17px 25px; border-bottom: 1px solid #edf1f6; color: #43516a; font-size: 13px; }
@@ -68,15 +68,33 @@
     .empty { text-align: center; padding: 35px 20px; color: var(--muted); }
     .panel-foot { padding: 16px 25px; background: #fcfdff; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 
+    .edit-button { border: 1px solid #dfe4fd; background: #eff1ff; color: #4555c5; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+    .edit-button:hover { background: #e5e9ff; }
+    .edit-button:focus-visible, .refresh:focus-visible, .signout:focus-visible { outline: 3px solid #a5b4fc; outline-offset: 2px; }
+
+    .edit-dialog { width: min(440px, calc(100% - 32px)); max-width: none; padding: 27px; border: 1px solid #e2e8f0; border-radius: 16px; color: var(--ink); background: white; box-shadow: 0 25px 80px rgba(15, 23, 42, .23); }
+    .edit-dialog::backdrop { background: rgba(15, 23, 42, .5); }
+    .edit-dialog h2 { font-size: 22px; }
+    .edit-dialog .dialog-description { color: var(--muted); font-size: 13px; line-height: 1.55; margin: 10px 0 23px; }
+    .edit-dialog label { display: block; color: #56647b; font-weight: 650; font-size: 13px; margin-bottom: 8px; }
+    .edit-dialog input { width: 100%; height: 44px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 9px; background: white; color: var(--ink); }
+    .edit-dialog input:focus { outline: 3px solid rgba(80, 95, 223, .15); border-color: var(--blue); }
+    .edit-error { color: #b91c1c; font-size: 12px; margin: 11px 0 0; min-height: 18px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+    .dialog-actions button { padding: 10px 15px; border-radius: 9px; font-weight: 700; font-size: 13px; }
+    .dialog-cancel { border: 1px solid #dce3eb; background: white; color: #43516a; }
+    .dialog-save { border: 1px solid var(--blue); background: var(--blue); color: white; }
+    .dialog-save:disabled { opacity: .6; cursor: wait; }
+
     @media (max-width: 620px) {
       .topbar-inner { padding: 12px 16px; }
       .top-actions { gap: 10px; }
       .account { display: none; }
       .page { padding: 30px 16px 45px; }
       .overview { grid-template-columns: 1fr; gap: 12px; }
-      .panel-head { padding: 22px 17px 17px; }
+      .panel-head { align-items: flex-start; padding: 22px 17px 17px; }
       .filters { padding: 0 17px 20px; }
-      .field, .search-field, .refresh { width: 100%; }
+      .field, .search-field, .filters > .refresh { width: 100%; }
       .field select { width: 100%; }
       .message { margin: 0 17px 17px; }
     }
@@ -101,76 +119,37 @@
       <div class="summary"><span class="summary-label">Selected company</span><strong class="summary-value company" id="selectedCompany">—</strong></div>
     </section>
 
-    <!-- Administration reporting section -->
-
-<section
-    class="panel"
-    style="margin-bottom: 24px;"
-    aria-labelledby="adminReportTitle"
->
-
-    <div class="panel-head">
-
+    <section class="panel report-panel" aria-labelledby="adminReportTitle">
+      <div class="panel-head">
         <div>
-            <h2 id="adminReportTitle">
-                Administration Reports
-            </h2>
-
-            <p class="panel-subtitle">
-                Organization and customer statistics
-            </p>
+          <h2 id="adminReportTitle">Administration Reports</h2>
+          <p class="panel-subtitle">Organization and customer statistics</p>
         </div>
-
-        <button
-            class="refresh"
-            id="loadAdminReport"
-            type="button"
-        >
-            View Report
-        </button>
-
-    </div>
-
-    <div
-        id="adminReportSection"
-        class="table-wrap"
-        hidden
-    >
-
+        <button class="refresh" id="loadAdminReport" type="button">View Report</button>
+      </div>
+      <div id="adminReportSection" class="table-wrap" hidden>
         <table>
-
-            <thead>
-                <tr>
-                    <th>Company</th>
-                    <th>Customers</th>
-                    <th>Users</th>
-                </tr>
-            </thead>
-
-            <tbody id="adminReportRows">
-            </tbody>
-
+          <thead><tr><th>Company</th><th>Customers</th><th>Users</th></tr></thead>
+          <tbody id="adminReportRows"></tbody>
         </table>
+      </div>
+      <div class="panel-foot" id="adminReportMessage" role="status">Select View Report to load statistics.</div>
+    </section>
 
-    </div>
-
-    <div
-        class="panel-foot"
-        id="adminReportMessage"
-        role="status"
-    >
-        Select View Report to load statistics.
-    </div>
-
-</section>
     <section class="panel" aria-labelledby="recordsTitle">
       <div class="panel-head">
-        <div><h2 id="recordsTitle">Customer records</h2><p class="panel-subtitle">Contact details and customer information</p></div>
+        <div>
+          <h2 id="recordsTitle">Customer records</h2>
+          <p class="panel-subtitle">Contact details and customer information</p>
+        </div>
       </div>
       <div class="filters">
         <div class="field">
           <label for="tenantSelect">Company</label>
-          <select id="tenantSelect"><option value="1">Alpha Health</option><option value="2">Beta Health</option></select>
+          <select id="tenantSelect">
+            <option value="1">Alpha Health</option>
+            <option value="2">Beta Health</option>
+          </select>
         </div>
         <div class="field search-field">
           <label for="customerSearch">Search customers</label>
@@ -180,15 +159,32 @@
       </div>
 
       <div class="message" id="errorMessage" role="alert" hidden></div>
+      <div class="message success" id="successMessage" role="status" hidden></div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Customer</th><th>Email address</th><th>Phone</th><th>SSN last 4</th></tr></thead>
-          <tbody id="customerRows"><tr><td class="empty" colspan="4">Loading customer records...</td></tr></tbody>
+          <thead>
+            <tr><th>Customer</th><th>Email address</th><th>Phone</th><th>SSN last 4</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="customerRows"><tr><td class="empty" colspan="5">Loading customer records...</td></tr></tbody>
         </table>
       </div>
       <div class="panel-foot" id="recordCount">Loading records...</div>
     </section>
   </main>
+
+  <dialog class="edit-dialog" id="editPhoneDialog" aria-labelledby="editPhoneTitle" aria-describedby="editPhoneCustomer">
+    <form id="editPhoneForm">
+      <h2 id="editPhoneTitle">Edit customer</h2>
+      <p class="dialog-description" id="editPhoneCustomer">Update customer contact information.</p>
+      <label for="editPhoneInput">Phone number</label>
+      <input id="editPhoneInput" type="tel" minlength="7" maxlength="30" required autocomplete="off">
+      <p class="edit-error" id="editPhoneError" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="dialog-cancel" id="cancelEditPhone" type="button">Cancel</button>
+        <button class="dialog-save" id="saveEditPhone" type="submit">Save changes</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="dashboard.js"></script>
 </body>
