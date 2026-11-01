@@ -125,6 +125,88 @@ if (!currentUser) {
     sessionStorage.removeItem("cs4489_demo_user");
     window.location.href = "index.html";
   });
+// ADMINISTRATIVE REPORT
+// Intentionally missing server-side authorization
+
+const adminReportButton =
+    document.getElementById("loadAdminReport");
+
+const adminReportSection =
+    document.getElementById("adminReportSection");
+
+const adminReportRows =
+    document.getElementById("adminReportRows");
+
+const adminReportMessage =
+    document.getElementById("adminReportMessage");
+
+
+adminReportButton.addEventListener("click", async () => {
+
+    adminReportButton.disabled = true;
+
+    adminReportMessage.textContent =
+        "Loading administration report...";
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE_URL}/api/admin/tenant-report`
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Report request failed: HTTP ${response.status}`
+            );
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data.companies)) {
+            throw new Error("Unexpected report format.");
+        }
+
+        // Clear previous report
+        adminReportRows.replaceChildren();
+
+        // Display each company
+        for (const company of data.companies) {
+
+            const row = document.createElement("tr");
+
+            const companyCell = document.createElement("td");
+            companyCell.textContent = company.company;
+
+            const customerCell = document.createElement("td");
+            customerCell.textContent = company.customer_count;
+
+            const userCell = document.createElement("td");
+            userCell.textContent = company.user_count;
+
+            row.appendChild(companyCell);
+            row.appendChild(customerCell);
+            row.appendChild(userCell);
+
+            adminReportRows.appendChild(row);
+        }
+
+        adminReportSection.hidden = false;
+
+        adminReportMessage.textContent =
+            "Administration report loaded successfully.";
+
+    } catch (error) {
+
+        adminReportMessage.textContent =
+            `Unable to load report: ${error.message}`;
+
+    } finally {
+
+        adminReportButton.disabled = false;
+
+    }
+
+});
 
   loadCustomers();
 }

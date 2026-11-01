@@ -116,10 +116,8 @@ def login(data: LoginRequest):
         conn = get_connection()
         cursor = conn.cursor()
 
-        # -------------------------------------------------
         # VULNERABILITY 1:
         # Username enumeration + SQL injection
-        # -------------------------------------------------
 
         username_query = f"""
             SELECT id
@@ -139,10 +137,8 @@ def login(data: LoginRequest):
             )
 
 
-        # -------------------------------------------------
         # VULNERABILITY 2:
         # Unsafe SQL construction
-        # -------------------------------------------------
 
         query = f"""
             SELECT
@@ -166,10 +162,8 @@ def login(data: LoginRequest):
         user = cursor.fetchone()
 
 
-        # -------------------------------------------------
         # VULNERABILITY 3:
         # Reveals that username exists but password is wrong
-        # -------------------------------------------------
 
         if not user:
             raise HTTPException(
@@ -178,10 +172,8 @@ def login(data: LoginRequest):
             )
 
 
-        # -------------------------------------------------
         # VULNERABILITY 4:
         # Excessive sensitive information returned
-        # -------------------------------------------------
 
         return {
             "message": "Login successful",
@@ -199,10 +191,8 @@ def login(data: LoginRequest):
 
     except Exception as e:
 
-        # -------------------------------------------------
         # VULNERABILITY 5:
         # Detailed database errors exposed
-        # -------------------------------------------------
 
         raise HTTPException(
             status_code=500,
@@ -219,4 +209,62 @@ def login(data: LoginRequest):
             cursor.close()
 
         if conn:
+            conn.close()
+
+# ADMINISTRATIVE TENANT REPORT
+# Vulnerability: Missing function-level authorization
+
+@app.get("/api/admin/tenant-report")
+def admin_tenant_report():
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT
+                t.id,
+                t.name,
+
+                (
+                    SELECT COUNT(*)
+                    FROM customers c
+                    WHERE c.tenant_id = t.id
+                ) AS customer_count,
+
+                (
+                    SELECT COUNT(*)
+                    FROM users u
+                    WHERE u.tenant_id = t.id
+                ) AS user_count
+
+            FROM tenants t
+            ORDER BY t.id;
+        """)
+
+        rows = cursor.fetchall()
+
+        companies = []
+
+        for row in rows:
+            companies.append({
+                "tenant_id": row[0],
+                "company": row[1],
+                "customer_count": row[2],
+                "user_count": row[3]
+            })
+
+        return {
+            "report": "Tenant Administration Summary",
+            "companies": companies
+        }
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+
+        if conn is not None:
             conn.close()

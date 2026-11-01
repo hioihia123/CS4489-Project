@@ -101,6 +101,68 @@
       <div class="summary"><span class="summary-label">Selected company</span><strong class="summary-value company" id="selectedCompany">—</strong></div>
     </section>
 
+    <!-- Administration reporting section -->
+
+<section
+    class="panel"
+    style="margin-bottom: 24px;"
+    aria-labelledby="adminReportTitle"
+>
+
+    <div class="panel-head">
+
+        <div>
+            <h2 id="adminReportTitle">
+                Administration Reports
+            </h2>
+
+            <p class="panel-subtitle">
+                Organization and customer statistics
+            </p>
+        </div>
+
+        <button
+            class="refresh"
+            id="loadAdminReport"
+            type="button"
+        >
+            View Report
+        </button>
+
+    </div>
+
+    <div
+        id="adminReportSection"
+        class="table-wrap"
+        hidden
+    >
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Customers</th>
+                    <th>Users</th>
+                </tr>
+            </thead>
+
+            <tbody id="adminReportRows">
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div
+        class="panel-foot"
+        id="adminReportMessage"
+        role="status"
+    >
+        Select View Report to load statistics.
+    </div>
+
+</section>
     <section class="panel" aria-labelledby="recordsTitle">
       <div class="panel-head">
         <div><h2 id="recordsTitle">Customer records</h2><p class="panel-subtitle">Contact details and customer information</p></div>
