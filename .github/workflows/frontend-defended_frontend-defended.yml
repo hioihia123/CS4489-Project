@@ -30,7 +30,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_3AB73C09E8014E92B3635C4CBE58434B }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A28E9AEAA60042C7A0BA537C0D7CAEFF }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_29C563E961FF4C7F9220CD }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_29C563E961FF4C7F9220CD180BD3A1CD }}
 
       - name: Deploy Defended Frontend
         uses: azure/webapps-deploy@v3
