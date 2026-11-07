@@ -21,7 +21,10 @@ form.addEventListener("submit", function (event) {
         username === storedAccount.username &&
         password === storedAccount.password
     ) {
+
+        localStorage.setItem("User", JSON.stringify(storedAccount));
         alert("Login successful!");
+        window.location.href = "landingpage.html";
 
     } else {
         alert("Incorrect email or password.");

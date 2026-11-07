@@ -1,0 +1,19 @@
+h1 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.details {
+    display: none;
+
+}
+
+.detailButton {
+    display: flex;
+    justify-content: flex-end;
+}
+.closer {
+    display: flex;
+    justify-content: center;
+
+}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing</title>
+    <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+
+    <div class="detailButton">
+        <button onclick="details()">
+            User Details    
+        </button>   
+        <button onclick="logout()">
+            Log Out    
+        </button>   
+       
+       
+    </div>
+    <div class="greeting">
+        <h1>Data and Application Security Homepage</h1>
+
+    </div>
+
+    <div id="user" class="details">
+        <h1>Details</h1>
+        <p id="username"></p>
+        <button class="closer" onclick="closeUser()">
+            Close    
+        </button> 
+       
+    </div>
+<script src="landing.js"></script>
+</body>
+</html>
