@@ -1,0 +1,6 @@
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30,<1
+gunicorn>=21,<24
+psycopg[binary]>=3.2,<4
+python-dotenv>=1,<2
+argon2-cffi>=23,<27

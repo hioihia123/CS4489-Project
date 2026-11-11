@@ -1,10 +1,6 @@
 "use strict";
 
-// Configure this only AFTER deploying the defended FastAPI backend.
-// Example: const API_BASE_URL = "https://your-defended-api.azurewebsites.net";
-// Never point this page at the deliberately vulnerable API.
-const API_BASE_URL = "";
-
+const API_BASE_URL = window.location.origin;
 const root = document.documentElement;
 const themeToggle = document.getElementById("themeToggle");
 const passwordToggle = document.getElementById("passwordToggle");

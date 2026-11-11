@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS4389 Database Security — Defended Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+  <script src="dashboard.js" defer></script>
+</head>
+<body>
+  <header class="bar">
+    <div>
+      <span class="shield">✓</span>
+      <strong>CS4389 Database Security</strong>
+      <span class="pill">Defended</span>
+    </div>
+    <button id="logoutButton" class="outline">Sign out</button>
+  </header>
+
+  <main>
+    <div class="heading">
+      <div>
+        <h1>Customer dashboard</h1>
+        <p id="userInfo">Checking your session…</p>
+      </div>
+    </div>
+
+    <p id="notice" class="notice" role="status" aria-live="polite"></p>
+
+    <section class="card">
+      <h2>Tenant-scoped customers</h2>
+      <p>Try a different tenant ID to verify that the server rejects cross-tenant access.</p>
+      <div class="fields">
+        <label for="tenantIdInput">Tenant ID</label>
+        <input id="tenantIdInput" type="number" min="1" step="1">
+        <button id="loadCustomersButton">Load customers</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Full name</th><th>Email</th><th>Phone</th><th>SSN last 4</th></tr></thead>
+          <tbody id="customersBody"><tr><td colspan="5">No data loaded</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Admin-only tenant report</h2>
+      <p>Regular users should receive HTTP 403. Tenant admins only see their own tenant.</p>
+      <button id="adminReportButton">Request admin report</button>
+      <pre id="adminReportOutput" aria-live="polite">No report requested</pre>
+    </section>
+
+    <section class="card">
+      <h2>Customer phone update</h2>
+      <p>Only authenticated tenant admins may edit customers from their own tenant.</p>
+      <div class="fields">
+        <label for="customerIdInput">Customer ID</label>
+        <input id="customerIdInput" type="number" min="1" step="1" placeholder="Example: 1">
+        <label for="phoneInput">New phone</label>
+        <input id="phoneInput" type="tel" placeholder="555-555-5555" maxlength="30">
+        <button id="updatePhoneButton">Save phone</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
