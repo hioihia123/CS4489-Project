@@ -1,76 +1,86 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 
-name: Build and deploy Python app to Azure Web App - cs4489-defended-v1
+name: Deploy Defended CS4489 Application
 
 on:
   push:
     branches:
-      - 'frontend-defended'
+      - frontend-defended
+
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cs4489-defended-production
+  cancel-in-progress: false
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read #This is required for actions/checkout
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python version
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      # 🛠️ Local Build Section (Optional)
-      # The following section in your workflow is designed to catch build issues early on the client side, before deployment. This can be helpful for debugging and validation. However, if this step significantly increases deployment time and early detection is not critical for your workflow, you may remove this section to streamline the deployment process.
-      - name: Create and Start virtual environment and Install dependencies
-        run: |
-          python -m venv antenv
-          source antenv/bin/activate
-          pip install -r requirements.txt
-                
-      # By default, when you enable GitHub CI/CD integration through the Azure portal, the platform automatically sets the SCM_DO_BUILD_DURING_DEPLOYMENT application setting to true. This triggers the use of Oryx, a build engine that handles application compilation and dependency installation (e.g., pip install) directly on the platform during deployment. Hence, we exclude the antenv virtual environment directory from the deployment artifact to reduce the payload size. 
-      - name: Upload artifact for deployment jobs
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-app
-          path: |
-            .
-            !antenv/
-
-      # 🚫 Opting Out of Oryx Build
-      # If you prefer to disable the Oryx build process during deployment, follow these steps:
-      # 1. Remove the SCM_DO_BUILD_DURING_DEPLOYMENT app setting from your Azure App Service Environment variables.
-      # 2. Refer to sample workflows for alternative deployment strategies: https://github.com/Azure/actions-workflow-samples/tree/master/AppService
-      
-
   deploy:
     runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
+      # 1. Download source code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configure Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          name: python-app
-      
+          python-version: "3.13"
+
+      # 3. Verify required files
+      - name: Verify project structure
+        run: |
+          test -f backend-defended/main.py
+          test -f backend-defended/auth.py
+          test -f backend-defended/db.py
+          test -f backend-defended/requirements.txt
+          test -f frontend-defended/index.html
+          test -f frontend-defended/login.js
+          test -f frontend-defended/dashboard.html
+          test -f frontend-defended/dashboard.js
+
+      # 4. Validate backend dependencies and syntax
+      - name: Validate Python backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend-defended/requirements.txt
+          python -m compileall -q backend-defended
+
+      # 5. Copy current frontend into FastAPI site folder
+      - name: Prepare combined deployment
+        run: |
+          mkdir -p backend-defended/site
+          cp frontend-defended/index.html \
+             frontend-defended/login.css \
+             frontend-defended/login.js \
+             frontend-defended/dashboard.html \
+             frontend-defended/dashboard.css \
+             frontend-defended/dashboard.js \
+             backend-defended/site/
+
+      # 6. Authenticate using Azure OpenID Connect
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_EC20A961FDD84837A12AF76599DCCB4F }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3B174FDEECBA4B0C9560B275B8EB185D }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_22429BB038AB4CA6969AF4785A6A354D }}
+          client-id: ${{ secrets.YOUR_GENERATED_CLIENT_ID_SECRET }}
+          tenant-id: ${{ secrets.YOUR_GENERATED_TENANT_ID_SECRET }}
+          subscription-id: ${{ secrets.YOUR_GENERATED_SUBSCRIPTION_ID_SECRET }}
 
-      - name: 'Deploy to Azure Web App'
+      # 7. Deploy only the defended application
+      - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
-        id: deploy-to-webapp
         with:
-          app-name: 'cs4489-defended-v1'
-          slot-name: 'Production'
-          
+          app-name: cs4489-defended-v1
+          package: ./backend-defended
+
+      # 8. Verify the deployed backend
+      - name: Check deployed application
+        run: |
+          curl --fail --retry 6 \
+            --retry-delay 10 \
+            --retry-all-errors \
+            https://cs4489-defended-v1.azurewebsites.net/health
