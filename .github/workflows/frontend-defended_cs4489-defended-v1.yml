@@ -62,13 +62,14 @@ jobs:
              frontend-defended/dashboard.js \
              backend-defended/site/
 
-      # 6. Authenticate using Azure OpenID Connect
+      # 6. Authenticate using Azure OpenID Connect 
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.YOUR_GENERATED_CLIENT_ID_SECRET }}
-          tenant-id: ${{ secrets.YOUR_GENERATED_TENANT_ID_SECRET }}
-          subscription-id: ${{ secrets.YOUR_GENERATED_SUBSCRIPTION_ID_SECRET }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_EC20A961FDD84837A12AF76599DCCB4F }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3B174FDEECBA4B0C9560B275B8EB185D }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_22429BB038AB4CA6969AF4785A6A354D }}
+
 
       # 7. Deploy only the defended application
       - name: Deploy to Azure App Service
