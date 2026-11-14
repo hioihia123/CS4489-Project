@@ -65,13 +65,28 @@ loginForm.addEventListener("submit", async (event) => {
     });
 
     if (!response.ok) {
-      // Do not show internal SQL errors, account existence, or stack traces.
-      showStatus(response.status === 401 || response.status === 403
-        ? "Invalid username or password."
-        : "Sign-in is temporarily unavailable. Please try again.");
-      return;
+
+    if (response.status === 429) {
+        showStatus(
+            "Too many login attempts. Please try again in about a minute."
+        );
+    }
+    else if (
+        response.status === 401 ||
+        response.status === 403
+    ) {
+        showStatus(
+            "Invalid username or password."
+        );
+    }
+    else {
+        showStatus(
+            "Sign-in is temporarily unavailable. Please try again."
+        );
     }
 
+    return;
+} 
     // The defended API must establish a verified server-side session.
     // Do not store passwords, access tokens, or trusted roles in web storage.
     window.location.assign("dashboard.html");

@@ -26,6 +26,7 @@ from auth import (
 from db import get_connection
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
+from rate_limit import authenticate_with_rate_limit
 
 logger = logging.getLogger("cs4389.defended")
 logging.basicConfig(level=logging.INFO)
@@ -129,43 +130,60 @@ def db_health():
     return {"database": "connected"}
 
 
+
 @app.post("/auth/login")
-def login(data: LoginRequest, request: Request, response: Response):
+def login(
+    data: LoginRequest,
+    request: Request,
+    response: Response
+):
+    # Preserve your existing origin protection.
     check_origin(request)
 
-    # There is no string concatenation: `%s` binds a literal value.
-    with get_connection() as conn:
-        with conn.cursor(row_factory=dict_row) as cur:
-            cur.execute(
-                """
-                SELECT id, tenant_id, username, password_hash, role
-                FROM users
-                WHERE username = %s
-                LIMIT 1
-                """,
-                (data.username,),
-            )
-            user = cur.fetchone()
-
-    # verify_password(None) checks a dummy hash, narrowing timing differences.
-    valid_password = verify_password(
-        data.password, user["password_hash"] if user else None
+    # Uses the peer address recognized by the ASGI server.
+    # See the Azure proxy warning below.
+    source_ip = (
+        request.client.host
+        if request.client
+        else "unknown-peer"
     )
-    if not user or not valid_password:
-        raise HTTPException(status_code=401, detail="Invalid username or password")
 
-    csrf_token = start_session(response, user["id"])
+    outcome, user = authenticate_with_rate_limit(
+        username=data.username,
+        password=data.password,
+        source_ip=source_ip
+    )
+
+    # Too many failed attempts.
+    if outcome == "blocked":
+        raise HTTPException(
+            status_code=429,
+            detail="Too many login attempts. Try again later."
+        )
+
+    # Username does not exist OR password is wrong.
+    if outcome == "invalid":
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password"
+        )
+
+    # Authentication succeeded.
+    csrf_token = start_session(
+        response,
+        user["id"]
+    )
+
     return {
         "message": "Login successful",
         "user": {
             "id": user["id"],
             "tenant_id": user["tenant_id"],
             "username": user["username"],
-            "role": user["role"],
+            "role": user["role"]
         },
-        "csrf_token": csrf_token,
+        "csrf_token": csrf_token
     }
-
 
 @app.get("/auth/me")
 def me(request: Request, user: dict = Depends(current_user)):
