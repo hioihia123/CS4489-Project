@@ -10,7 +10,7 @@
 <body>
   <header class="bar">
     <div>
-      <span class="shield">✓</span>
+     <!-- <span class="shield">✓</span> -->
       <strong>CS4389 Database Security</strong>
       <span class="pill">Defended</span>
     </div>
@@ -28,8 +28,7 @@
     <p id="notice" class="notice" role="status" aria-live="polite"></p>
 
     <section class="card">
-      <h2>Tenant-scoped customers</h2>
-      <p>Try a different tenant ID to verify that the server rejects cross-tenant access.</p>
+      <h2>Customers</h2>
       <div class="fields">
         <label for="tenantIdInput">Tenant ID</label>
         <input id="tenantIdInput" type="number" min="1" step="1">
@@ -44,15 +43,13 @@
     </section>
 
     <section class="card">
-      <h2>Admin-only tenant report</h2>
-      <p>Regular users should receive HTTP 403. Tenant admins only see their own tenant.</p>
+      <h2>Admin report</h2>
       <button id="adminReportButton">Request admin report</button>
       <pre id="adminReportOutput" aria-live="polite">No report requested</pre>
     </section>
 
     <section class="card">
       <h2>Customer phone update</h2>
-      <p>Only authenticated tenant admins may edit customers from their own tenant.</p>
       <div class="fields">
         <label for="customerIdInput">Customer ID</label>
         <input id="customerIdInput" type="number" min="1" step="1" placeholder="Example: 1">
