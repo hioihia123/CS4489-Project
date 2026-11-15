@@ -117,15 +117,97 @@ async function logout() {
   window.location.assign("index.html");
 }
 
+
+async function loadAuditEvents() {
+  if (!currentUser || currentUser.role !== "admin") {
+    return;
+  }
+
+  const tbody = document.getElementById("auditEventsBody");
+  const status = document.getElementById("auditStatus");
+  const summary = document.getElementById("auditSummary");
+
+  status.textContent = "Loading audit events...";
+
+  try {
+    const result = await api("/api/admin/audit-events");
+    const events = result.events;
+
+    tbody.replaceChildren();
+
+    const counts = {
+      allowed: 0,
+      denied: 0,
+      blocked: 0
+    };
+
+    for (const event of events) {
+      const row = document.createElement("tr");
+
+      counts[event.outcome] =
+        (counts[event.outcome] || 0) + 1;
+
+      const timestamp = new Date(
+        event.created_at
+      ).toLocaleString();
+
+      // Uses existing appendCell() helper,
+      // which renders text safely using textContent.
+      appendCell(row, event.event_type);
+      appendCell(row, event.display_user);
+      appendCell(row, event.outcome);
+      appendCell(row, event.resource);
+      appendCell(row, timestamp);
+
+      tbody.appendChild(row);
+    }
+
+    if (events.length === 0) {
+      const row = document.createElement("tr");
+      const cell = document.createElement("td");
+
+      cell.colSpan = 5;
+      cell.textContent = "No audit events found";
+
+      row.appendChild(cell);
+      tbody.appendChild(row);
+    }
+
+    summary.textContent =
+      `${counts.allowed} allowed · ` +
+      `${counts.denied} denied · ` +
+      `${counts.blocked} blocked`;
+
+    status.textContent =
+      `Showing the latest ${events.length} events ` +
+      `for tenant ${result.tenant_id}.`;
+
+  } catch (err) {
+    status.textContent =
+      `Unable to load audit logs: HTTP ` +
+      `${err.status || "network"}`;
+
+    setNotice(
+      "Audit log request failed.",
+      true
+    );
+  }
+}
+
 async function initialize() {
   try {
     const session = await api("/auth/me");
     currentUser = session.user;
     csrfToken = session.csrf_token;
+    const isAdmin = currentUser.role === "admin";
+    document.getElementById("auditSection").hidden =!isAdmin;
     document.getElementById("userInfo").textContent =
       `Signed in as ${currentUser.username} (${currentUser.role}) — tenant ${currentUser.tenant_id}`;
     document.getElementById("tenantIdInput").value = currentUser.tenant_id;
     await loadCustomers();
+    if (isAdmin) {
+      await loadAuditEvents();
+    }
   } catch {
     window.location.replace("index.html");
   }
@@ -136,3 +218,4 @@ document.getElementById("adminReportButton").addEventListener("click", loadRepor
 document.getElementById("updatePhoneButton").addEventListener("click", savePhone);
 document.getElementById("logoutButton").addEventListener("click", logout);
 initialize();
+document.getElementById("loadAuditButton").addEventListener("click", loadAuditEvents);

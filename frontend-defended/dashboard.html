@@ -58,6 +58,51 @@
         <button id="updatePhoneButton">Save phone</button>
       </div>
     </section>
+
+    
+<!-- Visible only to authenticated administrators -->
+<section class="card" id="auditSection" hidden>
+  <h2>Security Audit Logs</h2>
+
+  <p>
+    Review recent authentication events,
+    blocked requests, and customer changes.
+  </p>
+
+  <div class="fields">
+    <button type="button" id="loadAuditButton">
+      Refresh audit logs
+    </button>
+    <span id="auditSummary"></span>
+  </div>
+
+  <p id="auditStatus" role="status" aria-live="polite">
+    No audit events loaded
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>User</th>
+          <th>Outcome</th>
+          <th>Resource</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+
+      <tbody id="auditEventsBody">
+        <tr>
+          <td colspan="5">
+            No audit events loaded
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
   </main>
 </body>
 </html>
