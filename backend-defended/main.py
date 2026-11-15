@@ -205,24 +205,47 @@ def logout(
 
 
 @app.get("/api/customers/{tenant_id}")
-def customers_for_tenant(tenant_id: int, user: dict = Depends(current_user)):
+def customers_for_tenant(
+    tenant_id: int,
+    user: dict = Depends(current_user)
+):
+    # Defense 1: Prevent cross-tenant access
     if tenant_id != user["tenant_id"]:
-        raise HTTPException(status_code=403, detail="Access denied")
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied"
+        )
+
+    # Defense 2: Role-based sensitive-data masking
+    if user["role"] == "admin":
+        query = """
+            SELECT id, full_name, email, phone, ssn_last4
+            FROM customers
+            WHERE tenant_id = %s
+            ORDER BY id
+        """
+    else:
+        query = """
+            SELECT
+                id,
+                full_name,
+                email,
+                phone,
+                '****' AS ssn_last4
+            FROM customers
+            WHERE tenant_id = %s
+            ORDER BY id
+        """
 
     with get_connection() as conn:
         with conn.cursor(row_factory=dict_row) as cur:
-            cur.execute(
-                """
-                SELECT id, full_name, email, phone, ssn_last4
-                FROM customers
-                WHERE tenant_id = %s
-                ORDER BY id
-                """,
-                (user["tenant_id"],),
-            )
+            cur.execute(query, (user["tenant_id"],))
             customers = cur.fetchall()
 
-    return {"tenant_id": user["tenant_id"], "customers": customers}
+    return {
+        "tenant_id": user["tenant_id"],
+        "customers": customers
+    }
 
 
 @app.get("/api/admin/tenant-report")
