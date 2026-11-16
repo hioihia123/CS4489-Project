@@ -10,6 +10,63 @@ const submitButton = document.getElementById("submitButton");
 const formStatus = document.getElementById("formStatus");
 
 const savedTheme = localStorage.getItem("cs4389-defended-theme");
+
+const standardModeButton =
+  document.getElementById("standardModeButton");
+
+const adminModeButton =
+  document.getElementById("adminModeButton");
+
+const mfaField =
+  document.getElementById("mfaField");
+
+const totpInput =
+  document.getElementById("totp_code");
+
+let selectedMode = "user";
+
+function setLoginMode(mode) {
+  selectedMode = mode;
+
+  const isAdmin = mode === "admin";
+
+  standardModeButton.classList.toggle(
+    "active", !isAdmin
+  );
+
+  adminModeButton.classList.toggle(
+    "active", isAdmin
+  );
+
+  standardModeButton.setAttribute(
+    "aria-pressed", String(!isAdmin)
+  );
+
+  adminModeButton.setAttribute(
+    "aria-pressed", String(isAdmin)
+  );
+
+  mfaField.hidden = !isAdmin;
+  totpInput.disabled = !isAdmin;
+  totpInput.required = isAdmin;
+
+  if (!isAdmin) {
+    totpInput.value = "";
+  }
+
+  formStatus.hidden = true;
+}
+
+standardModeButton.addEventListener("click", () => {
+  setLoginMode("user");
+});
+
+adminModeButton.addEventListener("click", () => {
+  setLoginMode("admin");
+});
+
+setLoginMode("user");
+
 if (savedTheme === "light" || savedTheme === "dark") {
   root.dataset.theme = savedTheme;
 } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -53,6 +110,8 @@ loginForm.addEventListener("submit", async (event) => {
 
   const username = document.getElementById("username").value.trim();
   const password = passwordInput.value;
+
+  const totpCode = selectedMode === "admin"  ? totpInput.value.trim()  : null;
   if (!username || !password) return;
 
   submitButton.disabled = true;
@@ -60,18 +119,33 @@ loginForm.addEventListener("submit", async (event) => {
     const response = await fetch(`${API_BASE_URL.replace(/\/$/, "")}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, password, totp_code: totpCode || null}),
       credentials: "include"
     });
 
     if (!response.ok) {
-      // Do not show internal SQL errors, account existence, or stack traces.
-      showStatus(response.status === 401 || response.status === 403
-        ? "Invalid username or password."
-        : "Sign-in is temporarily unavailable. Please try again.");
-      return;
+
+    if (response.status === 429) {
+        showStatus(
+            "Too many login attempts. Please try again in about a minute."
+        );
+    }
+    else if (
+        response.status === 401 ||
+        response.status === 403
+    ) {
+        showStatus(
+            "Invalid username or password."
+        );
+    }
+    else {
+        showStatus(
+            "Sign-in is temporarily unavailable. Please try again."
+        );
     }
 
+    return;
+} 
     // The defended API must establish a verified server-side session.
     // Do not store passwords, access tokens, or trusted roles in web storage.
     window.location.assign("dashboard.html");

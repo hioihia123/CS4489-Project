@@ -197,9 +197,11 @@ class LoginRequest(BaseModel):
     username: str = Field(min_length=1, max_length=50)
 
     password: str = Field(min_length=1, max_length=256)
-
-
-
+ 
+    totp_code: str | None = Field(
+        default=None,
+        pattern=r"^[0-9]{6}$"
+    )
 
 
 class PhoneUpdate(BaseModel):
@@ -306,7 +308,9 @@ def login(
 
         password=data.password,
 
-        source_ip=source_ip
+        source_ip=source_ip,
+
+	totp_code=data.totp_code
 
     )
 

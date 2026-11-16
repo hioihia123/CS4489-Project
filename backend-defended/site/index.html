@@ -36,6 +36,27 @@
       </header>
 
       <form id="loginForm" autocomplete="on">
+        
+<div class="signin-switch" role="group" aria-label="Account type">
+  <button
+    type="button"
+    id="standardModeButton"
+    class="signin-switch-button active"
+    aria-pressed="true"
+  >
+    Standard User
+  </button>
+
+  <button
+    type="button"
+    id="adminModeButton"
+    class="signin-switch-button"
+    aria-pressed="false"
+  >
+    Administrator
+  </button>
+</div>
+
         <div class="field">
           <label for="username">Username</label>
           <div class="input-wrap">
@@ -66,6 +87,27 @@
             </button>
           </div>
         </div>
+
+
+<div class="field" id="mfaField" hidden>
+  <label for="totp_code">Authenticator code</label>
+
+  <div class="input-wrap">
+    <input
+      id="totp_code"
+      name="totp_code"
+      type="text"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      pattern="[0-9]{6}"
+      minlength="6"
+      maxlength="6"
+      placeholder="Enter 6-digit code"
+      disabled
+    >
+  </div>
+</div>
+
 
         <button class="submit-button" id="submitButton" type="submit">
           <span>Sign in</span>
