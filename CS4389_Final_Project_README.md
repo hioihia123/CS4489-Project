@@ -257,9 +257,7 @@ The project uses these fictional identities:
 
 The initialization scripts contain **initial classroom seed passwords**; passwords may have been changed in the working deployment, especially administrator passwords. Use the **current test passwords supplied to the instructor/team through an approved private channel**. Administrator login to the defended application also requires the enrolled authenticator's current six-digit TOTP code. Never commit live passwords, MFA seeds, session cookies, or Azure secrets to this repository.
 
-## 10. Suggested Verification and Classroom Demonstration
-
-Use only the fake accounts and your authorized demonstration environment.
+## 10. Endpoints
 
 | Check | Vulnerable behavior | Defended behavior |
 | --- | --- | --- |
