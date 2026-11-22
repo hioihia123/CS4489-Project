@@ -312,4 +312,3 @@ In the defended App Service, configure the database and secret environment varia
 
 The project provides a practical demonstration of **defense in depth**: secure SQL construction, password hashing, MFA, authenticated sessions, CSRF protection, authorization, tenant isolation, least-privilege database access, rate limiting, data masking, and audit logging work together to reduce security risks.
 
-For course assessment, compare the **same kinds of authorized test requests** against the two versions and document the observed HTTP responses, database behavior, and dashboard evidence.
