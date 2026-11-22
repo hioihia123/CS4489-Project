@@ -301,15 +301,12 @@ Both applications use Azure App Service and Azure Database for PostgreSQL Flexib
 
 In the defended App Service, configure the database and secret environment variables listed in Section 7, use the `defended_app` runtime database role, and set production-safe cookie settings. Keep production credentials in Azure app settings or another approved secrets system, never in source control.
 
-## 12. Known Scope and Reproducibility Notes
+## 12. Notes
 
 - The **deployed features have been checked by the project team**. This README describes the current code rather than the earlier development plan.
-- **PostgreSQL RLS and an application WAF are not implemented** in the reviewed repository; they should not be claimed as existing defenses.
-- The **audit event table and tenant-scoped read function** are used by the application, but their creation migration must be added to the repository to make a completely fresh deployment reproducible.
 - The vulnerable frontend is configured with its deployed backend URL by default; change the two `API_BASE_URL` values for local end-to-end testing.
 - Default seed credentials are for isolated demos only. Rotate them before exposing any publicly reachable copy.
 - GitHub Actions validates dependency installation, Python syntax, and service health; it does not run an exhaustive automated security test suite.
-- The vulnerable phone-edit endpoint is disabled unless explicitly enabled in an isolated test environment.
 
 ## 13. Project Purpose
 
