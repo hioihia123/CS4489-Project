@@ -282,7 +282,7 @@ The admin needs additional MFA code from Google Authenticator.
 
 ## 7. What to Test
 
-Only test systems and records you are authorized to access. Use the browser **Developer Tools → Network** panel or the FastAPI `/docs` interface to observe response status codes.
+Use the browser **Developer Tools → Network** panel or the FastAPI `/docs` interface to observe response status codes.
 
 | Test scenario | Vulnerable behavior | Defended behavior expected from current code |
 | --- | --- | --- |
