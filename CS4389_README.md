@@ -6,15 +6,14 @@
 
 ## 1. Project Overview
 
-This classroom project compares two versions of a fictional healthcare customer-management portal:
+This project compares 2 versions of a fictional healthcare customer-management portal:
 
 - **Vulnerable application:** intentionally insecure login SQL, missing tenant and administrator access checks, and verbose SQL errors.
 - **Defended application:** parameterized SQL, Argon2id password hashes, authenticated sessions, role and tenant authorization, administrator TOTP MFA, rate limiting, CSRF protection, data masking, and security audit logging.
 
 The database contains **synthetic records only** for **Alpha Health (tenant 1)** and **Beta Health (tenant 2)**. The two versions use **separate PostgreSQL databases**, `vulnerable_db` and `defended_db`, so their demonstrations do not share application data.
 
-> **Safety:** The vulnerable application is deliberately insecure. Run it only with fictional data in an authorized, isolated testing environment. Do not use it for real patient or customer records.
-
+> **Safety:** The vulnerable application is intentionally insecure. 
 ## 2. OS Requirements, Languages, and Software
 
 | Category | Requirements / technologies |
@@ -251,7 +250,6 @@ python rotate_admin_password.py --username alphaadmin
 python rotate_admin_password.py --username betaadmin
 ```
 
-**Audit setup caveat:** The application depends on `public.audit_events` and the `public.read_tenant_audit_events(...)` database function. Their complete creation SQL is **not yet committed to the repository**. A new defended database needs the team's tested audit objects and grants imported separately to reproduce the audit dashboard. Do not assume the three SQL files above completely provision this feature.
 
 ### 5.5 Start the defended application
 
@@ -276,11 +274,11 @@ The seed scripts define the following **fictional, initial test accounts**:
 | Organization | Role | Username | Initial seed password |
 | --- | --- | --- | --- |
 | Alpha Health (tenant 1) | User | `alice` | `alice123` |
-| Alpha Health (tenant 1) | Administrator | `alphaadmin` | `alpha123` |
+| Alpha Health (tenant 1) | Administrator | `alphaadmin` | `Daihocdallas456$` |
 | Beta Health (tenant 2) | User | `charlie` | `charlie123` |
 | Beta Health (tenant 2) | Administrator | `betaadmin` | `beta123` |
 
-These values are **not guaranteed to be the credentials of the deployed apps**. Seed scripts do not overwrite existing users, passwords may have been rotated, and defended administrators need a valid **six-digit TOTP code** from the enrolled authenticator. Share current deployed secrets privately with graders if required; never place them in the public README. Rotate demo passwords before exposing a deployment publicly.
+The admin needs additional MFA code from Google Authenticator. 
 
 ## 7. What to Test
 
@@ -298,7 +296,6 @@ Only test systems and records you are authorized to access. Use the browser **De
 | Customer phone edit | Insecure demonstration route is **off by default** | Requires admin role, tenant ownership and CSRF token |
 | Audit dashboard | Not present | Admin can read tenant-scoped security events **if audit DB objects are installed** |
 
-Expected codes reflect the implementation; they are **not performance benchmarks or a substitute for capturing actual live test results**. Do not publish real customer information, tokens, database connection strings, or internal exceptions in screenshots.
 
 ## 8. Deployed Applications and GitHub Actions
 
@@ -309,7 +306,6 @@ The deployed systems use Azure App Service and Azure PostgreSQL over TLS:
 - **Vulnerable API health:** https://cs4489-undefended-v1-cjbndzc9h0hvgqf7.westus-01.azurewebsites.net/health
 - **Vulnerable frontend:** Azure App Service `cs4489-frontend` (see your application's configured hostname in Azure).
 
-These links identify the configured targets; uptime must be confirmed with `/health`, `/db-health` and application-level tests.
 
 Three workflows under `.github/workflows/` deploy the respective applications:
 
@@ -319,9 +315,6 @@ Three workflows under `.github/workflows/` deploy the respective applications:
 | `main_cs4489-undefended-v1.yml` | `main` | `backend-vulnerable/` application changes |
 | `frontend-defended_cs4489-defended-v1.yml` | `frontend-defended` | `frontend-defended/` or `backend-defended/` application changes |
 
-**Documentation-only pushes, including edits to `README.md` or `README-2.md`, do not automatically deploy** when the updated workflows are installed on their respective branches. Changes to the workflow YAML files alone also do not automatically deploy; use the manual run command to test an edited workflow. Deployments can still be run deliberately using **Actions → Run workflow** (`workflow_dispatch`). If a commit contains both README and application-code changes, the code change still triggers deployment. Path filters do not skip the entire workflow when other matching files change.
-
-If Azure returns `503` and logs say `No module named uvicorn`, the deployment probably did not install Python dependencies on the Azure server. Check the server-side Oryx build log and ensure Python build automation (`SCM_DO_BUILD_DURING_DEPLOYMENT=1` and `ENABLE_ORYX_BUILD=true`) is configured. Installing libraries on the GitHub runner does not alone make them available on Azure.
 
 ## 9. Limitations and Incomplete Features
 
@@ -335,6 +328,4 @@ If Azure returns `503` and logs say `No module named uvicorn`, the deployment pr
 8. **The unsafe phone-update demo is disabled by default.** It must only be enabled in a separate isolated environment with fictional data.
 9. **Azure availability and database connectivity depend on configuration.** Successful GitHub Actions execution does not guarantee a running backend or healthy database.
 
-## 10. Project Purpose
-
-By demonstrating the same attacks against vulnerable and defended implementations, this project illustrates how **defense in depth** combines secure SQL construction, credential protection, session security, tenant authorization, role checks, MFA, CSRF protection, least-privilege database access, rate limiting, data masking, and audit logging to reduce the impact of application security failures.
+\
