@@ -325,7 +325,3 @@ Three workflows under `.github/workflows/` deploy the respective applications:
 5. **Vulnerable frontend API location is hard-coded** in its browser JavaScript, so local testing requires changing `API_BASE_URL`.
 6. **No comprehensive automated security/performance test suite.** The GitHub workflows validate builds/deployments and some service-health behavior, not all classroom attack cases.
 7. **Rate limiting depends on the source address observed by FastAPI.** When behind an Azure proxy, its actual identification behavior requires deployment-specific verification.
-8. **The unsafe phone-update demo is disabled by default.** It must only be enabled in a separate isolated environment with fictional data.
-9. **Azure availability and database connectivity depend on configuration.** Successful GitHub Actions execution does not guarantee a running backend or healthy database.
-
-\
