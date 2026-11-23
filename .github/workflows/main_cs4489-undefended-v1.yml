@@ -4,7 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'backend-vulnerable/**'
+      - '!backend-vulnerable/**/*.md'
+      - '!backend-vulnerable/**/*.MD'
   workflow_dispatch:
+
+concurrency:
+  group: cs4489-vulnerable-backend-production
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
